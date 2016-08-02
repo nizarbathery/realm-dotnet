@@ -115,8 +115,6 @@ namespace IntegrationTests.Shared
             new object[] { "NullableDateTimeOffsetProperty", new DateTimeOffset(1956, 6, 1, 0, 0, 0, TimeSpan.Zero) }
         };
 
-        /*
-         * ASD hide temporarily until add those back in
         [Test]
         public void AccessingRemovedObjectShouldThrow()
         {
@@ -138,6 +136,5 @@ namespace IntegrationTests.Shared
                 var illegalAccess = p1.FirstName; 
             });
         }
-        */
     }
 }

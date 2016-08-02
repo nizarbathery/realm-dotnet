@@ -37,16 +37,23 @@ namespace Realms
 
         internal RowHandle RowHandle => _rowHandle;
 
+        /// <summary>
+        /// Allows you to check if the object has been associated with a Realm, either at creation or via Realm.Manage.
+        /// </summary>
+        public bool IsManaged => _realm != null;
+
+        /// <summary>
+        /// Returns true if this object is managed and represents a row in the database.
+        /// If a managed object has been removed from the Realm, it is no longer valid and accessing properties on it
+        /// will throw an exception.
+        /// Unmanaged objects are always considered valid.
+        /// </summary>
+        public bool IsValid => _rowHandle?.IsAttached != false;
 
         /// <summary>
         /// The <see cref="Realm"/> instance this object belongs to, or <code>null</code> if it is unmanaged.
         /// </summary>
         public Realm Realm => _realm;
-
-        /// <summary>
-        /// Allows you to check if the object has been associated with a Realm, either at creation or via Realm.Manage.
-        /// </summary>
-        public bool IsManaged => _realm != null;
 
         internal void _Manage(Realm realm, RowHandle rowHandle)
         {
