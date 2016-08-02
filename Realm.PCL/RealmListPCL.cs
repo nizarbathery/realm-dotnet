@@ -15,9 +15,9 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////
- 
+
 /// PROXY VERSION OF CLASS USED IN PCL FOR BAIT AND SWITCH PATTERN 
- 
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,7 +34,7 @@ namespace Realms
     /// </remarks>
     /// 
     /// <typeparam name="T">Type of the RealmObject which is the target of the relationship.</typeparam>
-    public class RealmList<T> : IList<T> where T : RealmObject
+    public class RealmList<T> : IList<T>, ICopyValuesFrom where T : RealmObject
     {
 
         /// <summary>
