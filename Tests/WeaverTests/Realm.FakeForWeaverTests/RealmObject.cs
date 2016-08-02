@@ -28,16 +28,14 @@ namespace Realms
     {
         public List<string> LogList = new List<string>();
 
-        public void LogString(string s)
+        private void LogString(string s)
         {
             LogList.Add(s);
         }
 
-        public  void LogCall(string parameters = "", [CallerMemberName] string caller = "")
+        private void LogCall(string parameters = "", [CallerMemberName] string caller = "")
         {
-            var stackTrace = new StackTrace(1, false);
-            var type = stackTrace.GetFrame(0).GetMethod().DeclaringType;
-            LogString(type.Name + "." + caller + "(" + parameters + ")");
+            LogString("RealmObject." + caller + "(" + parameters + ")");
         }
 
         private bool _isManaged;
@@ -279,13 +277,13 @@ namespace Realms
             LogCall($"{nameof(propertyName)} = \"{propertyName}\", {nameof(value)} = {value}");
         }
 
-        protected RealmList<T> GetListValue<T>(string propertyName) where T : RealmObject
+        protected IList<T> GetListValue<T>(string propertyName) where T : RealmObject
         {
             LogCall($"{nameof(propertyName)} = \"{propertyName}\"");
             return new RealmList<T>();
         }
 
-        protected void SetListValue<T>(string propertyName, RealmList<T> value) where T : RealmObject
+        protected void SetListValue<T>(string propertyName, IList<T> value) where T : RealmObject
         {
             LogCall($"{nameof(propertyName)} = \"{propertyName}\", {nameof(value)} = {value}");
         }
