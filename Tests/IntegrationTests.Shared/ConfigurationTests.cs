@@ -1,4 +1,4 @@
-﻿////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
 //
@@ -27,7 +27,7 @@ using Realms;
 
 namespace IntegrationTests
 {
-    [TestFixture]
+    [TestFixture, Preserve(AllMembers = true)]
     public class ConfigurationTests
     {
         private void ReliesOnEncryption()

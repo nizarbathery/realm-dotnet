@@ -1,3 +1,20 @@
+0.77.2 (2016-08-02)
+-------------------
+
+**Special private release**
+
+To debug issues some users encountered after the release of 0.77.1, we went back to 0.76.1 and added in primarily just IList declarations and detached row detection.
+
+### Major Changes
+* To Many relationships can now be declared with an `IList<DestClass>` rather than requiring `RealmList<DestClass>`. This is significantly faster than using `RealmList` due to caching the list. (Issue #287)
+* Creating standalone objects with lists of related objects is now possible. Passing such an object into `Realm.Manage` will cause the entire object graph from that object down to become managed.
+
+### Minor Changes
+* Accessing properties on invalid objects will throw an exception rather than crash with a segfault (#662)
+
+Using core 1.0.2 (same as 0.76.0)
+
+
 0.76.0 (2016-06-09)
 -------------------
 

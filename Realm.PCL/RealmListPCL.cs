@@ -203,5 +203,11 @@ namespace Realms
         }
 
         #endregion
+
+        void ICopyValuesFrom.CopyValuesFrom(IEnumerable<RealmObject> values)
+        {
+            RealmPCLHelpers.ThrowProxyShouldNeverBeUsed();
+        }
+
     }
 }

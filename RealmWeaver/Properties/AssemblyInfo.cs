@@ -15,9 +15,7 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////
-
+ 
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
-[assembly: AssemblyTitle("Realm.XamarinAndroid")]
-[assembly: InternalsVisibleTo("IntegrationTests.XamarinAndroid")]
+[assembly: AssemblyTitle("RealmWeaver")]

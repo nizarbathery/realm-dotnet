@@ -1,4 +1,4 @@
-﻿////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
 //
@@ -31,7 +31,10 @@ using System.Runtime.InteropServices;
 
 namespace IntegrationTests.Shared
 {
-    [TestFixture]
+    [TestFixture, Preserve(AllMembers = true)]
+#if WINDOWS
+    [Ignore("Notifications are not implemented on Windows yet")]
+#endif
     public class NotificationTests
     {
         private string _databasePath;

@@ -22,6 +22,7 @@ using System.Collections.Generic;
 
 namespace IntegrationTests
 {
+    [Preserve(AllMembers = true)]
     public class Person : RealmObject
     {
         // Automatically implemented (overridden) properties
@@ -80,6 +81,6 @@ namespace IntegrationTests
             set { _nickname = value; }
         }
 
-        public RealmList<Person> Friends { get; }  
+        public IList<Person> Friends { get; }
     }
 }

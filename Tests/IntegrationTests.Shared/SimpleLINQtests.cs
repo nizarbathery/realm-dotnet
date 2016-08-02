@@ -1,4 +1,4 @@
-﻿////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
 //
@@ -22,9 +22,11 @@ using System.Text;
 using System.Linq;
 using NUnit.Framework;
 using Realms;
+using IntegrationTests.Shared;
 
 namespace IntegrationTests
 {
+    [TestFixture, Preserve(AllMembers = true)]
     class SimpleLINQtests : PeopleTestsBase
     {
         // see comment on base method why this isn't decorated with [SetUp]
@@ -67,7 +69,7 @@ namespace IntegrationTests
             var countNotEqual = _realm.All<Person>().Where(p => !(p.Score == 42.42f)).Count();
             Assert.That(countNotEqual, Is.EqualTo(2));
 
-            var countNotComplex = _realm.All<Person>().Where( p => !(p.Longitude < -70.0 && p.Longitude > -90.0)).Count();
+            var countNotComplex = _realm.All<Person>().Where(p => !(p.Longitude < -70.0 && p.Longitude > -90.0)).Count();
             Assert.That(countNotComplex, Is.EqualTo(2));
         }
 
@@ -75,7 +77,7 @@ namespace IntegrationTests
         [Test]
         public void CountFoundItems()
         {
-            var r0 = _realm.All<Person> ().Where (p => p.Score == 42.42f);
+            var r0 = _realm.All<Person>().Where(p => p.Score == 42.42f);
             var c0 = r0.Count();  // defer so can check in debugger if RealmResults.Count() evaluated correctly
             Assert.That(c0, Is.EqualTo(1));
 
@@ -85,22 +87,22 @@ namespace IntegrationTests
             var c2 = _realm.All<Person>().Where(p => p.IsInteresting).Count();
             Assert.That(c2, Is.EqualTo(2));
 
-            var c3 = _realm.All<Person>().Where(p => p.FirstName=="John").Count();
+            var c3 = _realm.All<Person>().Where(p => p.FirstName == "John").Count();
             Assert.That(c3, Is.EqualTo(2));
 
-            var c4 = _realm.All<Person>().Count(p => p.FirstName=="John");
+            var c4 = _realm.All<Person>().Count(p => p.FirstName == "John");
             Assert.That(c4, Is.EqualTo(2));
         }
 
 
         // added to pick up a nasty side-effect from casting
         [Test]
-        public void CountFoundWithCasting ()
+        public void CountFoundWithCasting()
         {
-            var r0 = _realm.All<Person> ().Where (p => p.Score == 42.42f);
+            var r0 = _realm.All<Person>().Where(p => p.Score == 42.42f);
             var r1 = r0 as RealmResults<Person>;  // this is its runtime type but r0's Compile Time type is IQueryable<Person>
-            var c0 = r1.Count ();  // invokes RealmResults<T>.Count() shortcut method
-            Assert.That (c0, Is.EqualTo (1));
+            var c0 = r1.Count();  // invokes RealmResults<T>.Count() shortcut method
+            Assert.That(c0, Is.EqualTo(1));
         }
 
 
@@ -286,38 +288,38 @@ namespace IntegrationTests
         [Test]
         public void AnySucceeds()
         {
-            Assert.That( _realm.All<Person>().Where(p => p.Latitude > 50).Any());
-            Assert.That( _realm.All<Person>().Where(p => p.Score > 0).Any());
-            Assert.That( _realm.All<Person>().Where(p => p.IsInteresting == false).Any());
-            Assert.That( _realm.All<Person>().Where(p => p.FirstName == "John").Any());
+            Assert.That(_realm.All<Person>().Where(p => p.Latitude > 50).Any());
+            Assert.That(_realm.All<Person>().Where(p => p.Score > 0).Any());
+            Assert.That(_realm.All<Person>().Where(p => p.IsInteresting == false).Any());
+            Assert.That(_realm.All<Person>().Where(p => p.FirstName == "John").Any());
         }
 
 
         [Test]
         public void AnyFails()
         {
-            Assert.False( _realm.All<Person>().Where(p => p.Latitude > 100).Any());
-            Assert.False( _realm.All<Person>().Where(p => p.Score > 50000).Any());
-            Assert.False( _realm.All<Person>().Where(p => p.FirstName == "Samantha").Any());
+            Assert.False(_realm.All<Person>().Where(p => p.Latitude > 100).Any());
+            Assert.False(_realm.All<Person>().Where(p => p.Score > 50000).Any());
+            Assert.False(_realm.All<Person>().Where(p => p.FirstName == "Samantha").Any());
         }
 
 
         [Test]
         public void SingleFailsToFind()
         {
-            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Single(p => p.Latitude > 100) );
-            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Where(p => p.Latitude > 100).Single() );
-            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Single(p => p.Score > 50000) );
-            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Single(p => p.FirstName == "Samantha") );
+            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Single(p => p.Latitude > 100));
+            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Where(p => p.Latitude > 100).Single());
+            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Single(p => p.Score > 50000));
+            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Single(p => p.FirstName == "Samantha"));
         }
 
 
         [Test]
         public void SingleFindsTooMany()
         {
-            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Where(p => p.Latitude == 50).Single() );
-            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Single(p => p.Score != 100.0f) );
-            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Single(p => p.FirstName == "John") );
+            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Where(p => p.Latitude == 50).Single());
+            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Single(p => p.Score != 100.0f));
+            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Single(p => p.FirstName == "John"));
         }
 
 
@@ -338,10 +340,10 @@ namespace IntegrationTests
         [Test]
         public void FirstFailsToFind()
         {
-            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().First(p => p.Latitude > 100) );
-            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Where(p => p.Latitude > 100).First() );
-            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().First(p => p.Score > 50000) );
-            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().First(p => p.FirstName == "Samantha") );
+            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().First(p => p.Latitude > 100));
+            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().Where(p => p.Latitude > 100).First());
+            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().First(p => p.Score > 50000));
+            Assert.Throws<InvalidOperationException>(() => _realm.All<Person>().First(p => p.FirstName == "Samantha"));
         }
 
         [Test]
@@ -364,8 +366,22 @@ namespace IntegrationTests
             var moderateScorers = _realm.All<Person>().Where(p => p.Score >= 20.0f && p.Score <= 100.0f);
             var johnScorer = moderateScorers.Where(p => p.FirstName == "John").First();
             Assert.That(johnScorer, Is.Not.Null);
-            Assert.That(johnScorer.Score, Is.EqualTo (100.0f));
-            Assert.That(johnScorer.FullName, Is.EqualTo ("John Doe"));
+            Assert.That(johnScorer.Score, Is.EqualTo(100.0f));
+            Assert.That(johnScorer.FullName, Is.EqualTo("John Doe"));
         }
+
+        /// <summary>
+        ///  Test primarily to see our message when user has wrong parameter type.
+        /// </summary>
+        [Test]
+        public void IntegerConversionTriggersError()
+        {
+            long biggerInt = 12;
+            //if you want to see the error message, comment out the assert
+            Assert.Throws<System.NotSupportedException>(() => {
+                _realm.All<ObjectIdInt16Object>().First(p => p.Int16Property == biggerInt);
+            });
+        }
+
     } // SimpleLINQtests
 }

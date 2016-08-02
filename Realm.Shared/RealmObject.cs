@@ -35,8 +35,13 @@ namespace Realms
         private RowHandle _rowHandle;
         private Metadata _metadata;
 
-        internal Realm Realm => _realm;
         internal RowHandle RowHandle => _rowHandle;
+
+
+        /// <summary>
+        /// The <see cref="Realm"/> instance this object belongs to, or <code>null</code> if it is unmanaged.
+        /// </summary>
+        public Realm Realm => _realm;
 
         /// <summary>
         /// Allows you to check if the object has been associated with a Realm, either at creation or via Realm.Manage.
@@ -75,16 +80,19 @@ namespace Realms
             foreach (var prop in wovenProperties)
             {
                 var value = prop.Field.GetValue(this);
-                if (prop.Info.PropertyType.IsGenericType)
-                {
-                    var genericType = prop.Info.PropertyType.GetGenericTypeDefinition();
-                    if (genericType == typeof(RealmList<>))
+                if (value != null) {
+                    var listValue = value as IEnumerable<RealmObject>;
+                    if (listValue != null)  // assume it is IList NOT a RealmList so need to wipe afer copy
                     {
-                        continue;
+                    // cope with ReplaceListGetter creating a getter which assumes 
+                    // a backing field for a managed IList is already a RealmList, so null it first
+                        prop.Field.SetValue(this, null);  // now getter will create a RealmList below
+                        var realmList = (ICopyValuesFrom)prop.Info.GetValue(this, null);
+                        realmList.CopyValuesFrom(listValue);
+                    } else {
+                        prop.Info.SetValue(this, value, null);
                     }
-                }
-
-                prop.Info.SetValue(this, value, null);
+                }  // only null if blank relationship or string so leave as default
             }
         }
 

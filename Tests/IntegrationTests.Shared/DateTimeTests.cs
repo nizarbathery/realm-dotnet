@@ -1,4 +1,4 @@
-﻿////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
 //
@@ -27,7 +27,7 @@ using System.Linq;
 
 namespace IntegrationTests.Shared
 {
-    [TestFixture]
+    [TestFixture, Preserve(AllMembers = true)]
     public class DateTimeTests
     {
         //TODO: this is ripe for refactoring across test fixture classes
@@ -93,7 +93,7 @@ namespace IntegrationTests.Shared
             var sortedTurings = _realm.All<Person>().OrderBy(p => p.Birthday);
             DateTimeOffset prevB = new DateTimeOffset();
             foreach (var t in sortedTurings) {
-                Assert.That(t.Birthday.ToRealmUnixTimeMilliseconds(), Is.GreaterThan(prevB.ToRealmUnixTimeMilliseconds()));
+                Assert.That(t.Birthday, Is.GreaterThan(prevB));
                 prevB = t.Birthday;
             }
         }

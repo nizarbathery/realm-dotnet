@@ -1,4 +1,4 @@
-﻿////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
 //
@@ -20,7 +20,7 @@ namespace Realms
 {
     internal class SharedRealmHandle : RealmHandle
     {
-        [Preserve("Constructor used by marshaling, cannot be removed by linker")]
+        [Preserve]  // "Constructor used by marshaling, cannot be removed by linker"
         public SharedRealmHandle()
         {
         }
