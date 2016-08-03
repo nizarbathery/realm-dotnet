@@ -444,7 +444,7 @@ uint64_t Realm::get_schema_version(const realm::Realm::Config &config)
 
 void Realm::close()
 {
-    verify_thread();
+// ASD removed as it is removed later in 0.77.1 and causes crashes in finalizing    verify_thread();
 
     if (m_coordinator) {
         m_coordinator->unregister_realm(this);
