@@ -22,7 +22,7 @@ using System.Collections.Generic;
 
 namespace IntegrationTests
 {
-    [Preserve(AllMembers = true)]
+    [Preserve]
     public class Person : RealmObject
     {
         // Automatically implemented (overridden) properties

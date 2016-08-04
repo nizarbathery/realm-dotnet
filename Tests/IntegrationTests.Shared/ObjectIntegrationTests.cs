@@ -27,7 +27,7 @@ using System.Threading.Tasks;
 
 namespace IntegrationTests
 {
-    [TestFixture, Preserve(AllMembers = true)]
+    [TestFixture, Preserve]
     public class ObjectIntegrationTests : PeopleTestsBase
     {
 
@@ -266,7 +266,7 @@ namespace IntegrationTests
 
     }  // ObjectIntegrationTests
 
-    [TestFixture, Preserve(AllMembers = true)]
+    [TestFixture, Preserve]
     public class RealmMigrationTests
     {
         [Test]

@@ -25,7 +25,7 @@ using System.Threading;
 
 namespace IntegrationTests.Shared
 {
-    [TestFixture, Preserve(AllMembers = true)]
+    [TestFixture, Preserve]
     public class RefreshTests
     {
         private Realm _realm;

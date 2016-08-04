@@ -24,7 +24,7 @@ using Realms;
 
 namespace IntegrationTests.Shared
 {
-    [TestFixture, Preserve(AllMembers = true)]
+    [TestFixture, Preserve]
     public class AsyncTests
     {
         private Realm _realm;

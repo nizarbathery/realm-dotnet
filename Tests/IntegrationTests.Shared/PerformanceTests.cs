@@ -28,7 +28,7 @@ using Realms;
 
 namespace IntegrationTests
 {
-    [TestFixture, Preserve(AllMembers = true)]
+    [TestFixture, Preserve]
     public class PerformanceTests
     {
         protected Realm _realm;

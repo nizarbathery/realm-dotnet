@@ -32,7 +32,7 @@ namespace Realms
     /// </remarks>
     /// 
     /// <typeparam name="T">Type of the RealmObject which is the target of the relationship.</typeparam>
-    [Preserve(AllMembers = true)]
+    [Preserve]
     public class RealmList<T> : IList<T>, ICopyValuesFrom where T : RealmObject
     {
         public class Enumerator : IEnumerator<T>

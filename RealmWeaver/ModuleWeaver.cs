@@ -146,7 +146,9 @@ public class ModuleWeaver
         _realmAssembly = AssemblyResolver.Resolve("Realm");  // Note that the assembly is Realm but the namespace Realms with the s
 
         _realmObject = _realmAssembly.MainModule.GetTypes().First(x => x.Name == "RealmObject");
+        LogDebug("About to try Single to find IsManaged");
         _realmObjectIsManagedGetter = ModuleDefinition.ImportReference(_realmObject.Properties.Single(x => x.Name == "IsManaged").GetMethod);
+        LogDebug("Success using Single to find IsManaged");
 
         // Cache of getter and setter methods for the various types.
         var methodTable = new Dictionary<string, Tuple<MethodReference, MethodReference>>();
@@ -258,6 +260,7 @@ public class ModuleWeaver
             return;
         }
 
+        LogDebug("About to try SingleOrDefault to GetConstructors");
         var objectConstructor = type.GetConstructors()
             .SingleOrDefault(c => c.Parameters.Count == 0 && c.IsPublic && !c.IsStatic);
         if (objectConstructor == null)
@@ -335,6 +338,7 @@ public class ModuleWeaver
         // treat IList and RealmList similarly but IList gets a default so is useable as standalone
         // IList or RealmList allows people to declare lists only of _realmObject due to the class definition
         else if (prop.PropertyType.Name == "IList`1" && prop.PropertyType.Namespace == "System.Collections.Generic") {
+            LogDebug("About to try Single to find element type of IList");
             var elementType = ((GenericInstanceType)prop.PropertyType).GenericArguments.Single();
             if (!elementType.Resolve().BaseType.IsSameAs(_realmObject)) {
                 LogWarningPoint(
@@ -350,6 +354,7 @@ public class ModuleWeaver
                 return false;
             }
             var concreteListType = new GenericInstanceType(System_IList) { GenericArguments = { elementType } };
+            LogDebug("About to try Single to find constructor of IList");
             var listConstructor = concreteListType.Resolve().GetConstructors().Single(c => c.IsPublic && c.Parameters.Count == 0);
             var concreteListConstructor = listConstructor.MakeHostInstanceGeneric(elementType);
 
@@ -363,6 +368,7 @@ public class ModuleWeaver
                 new GenericInstanceMethod(_genericGetListValueReference) { GenericArguments = { elementType } }, elementType,
                              ModuleDefinition.ImportReference(concreteListConstructor) );
         } else if (prop.PropertyType.Name == "RealmList`1" && prop.PropertyType.Namespace == "Realms") {
+            LogDebug("About to try Single to find element type of RealmList");
             var elementType = ((GenericInstanceType)prop.PropertyType).GenericArguments.Single();
             if (prop.SetMethod != null) {
                 LogErrorPoint(

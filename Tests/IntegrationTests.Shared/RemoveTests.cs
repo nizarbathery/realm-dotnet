@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace IntegrationTests.Shared
 {
-    [TestFixture, Preserve(AllMembers = true)]
+    [TestFixture, Preserve]
     public class RemoveTests
     {
         protected string _databasePath;

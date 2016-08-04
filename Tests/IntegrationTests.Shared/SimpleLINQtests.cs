@@ -26,7 +26,7 @@ using IntegrationTests.Shared;
 
 namespace IntegrationTests
 {
-    [TestFixture, Preserve(AllMembers = true)]
+    [TestFixture, Preserve]
     class SimpleLINQtests : PeopleTestsBase
     {
         // see comment on base method why this isn't decorated with [SetUp]

@@ -27,7 +27,7 @@ using Realms;
 
 namespace IntegrationTests
 {
-    [TestFixture, Preserve(AllMembers = true)]
+    [TestFixture, Preserve]
     public class ConfigurationTests
     {
         private void ReliesOnEncryption()

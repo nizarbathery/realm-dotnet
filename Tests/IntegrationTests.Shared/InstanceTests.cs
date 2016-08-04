@@ -25,7 +25,7 @@ using System.Threading;
 
 namespace IntegrationTests
 {
-    [TestFixture, Preserve(AllMembers = true)]
+    [TestFixture, Preserve]
     public class InstanceTests
     {
         const string specialRealmName = "EnterTheMagic.realm";

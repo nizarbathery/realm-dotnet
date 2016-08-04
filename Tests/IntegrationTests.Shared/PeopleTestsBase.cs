@@ -24,7 +24,7 @@ using Realms;
 
 namespace IntegrationTests
 {
-    [Preserve(AllMembers = true)]
+    [Preserve]
     public class PeopleTestsBase
     {
         protected Realm _realm;

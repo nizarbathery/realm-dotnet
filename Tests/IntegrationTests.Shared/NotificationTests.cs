@@ -31,7 +31,7 @@ using System.Runtime.InteropServices;
 
 namespace IntegrationTests.Shared
 {
-    [TestFixture, Preserve(AllMembers = true)]
+    [TestFixture, Preserve]
 #if WINDOWS
     [Ignore("Notifications are not implemented on Windows yet")]
 #endif
