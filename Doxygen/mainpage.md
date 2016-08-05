@@ -7,7 +7,7 @@ The main classes you will use are:
 
 - [Realm](@ref Realms.Realm)
 - [RealmObject](@ref Realms.RealmObject)
-- [RealmList](@ref Realms.RealmList)
+- [RealmList](@ref Realms.RealmList) mainly as a return value.
 - [Transaction](@ref Realms.Transaction)
 
 Helper classes you may use are:
