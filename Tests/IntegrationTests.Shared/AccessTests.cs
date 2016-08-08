@@ -25,7 +25,7 @@ using Realms;
 
 namespace IntegrationTests.Shared
 {
-    [TestFixture, Preserve
+    [TestFixture, Preserve]
     public class AccessTests
     {
         protected Realm _realm;
