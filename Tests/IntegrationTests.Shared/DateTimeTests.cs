@@ -148,5 +148,25 @@ namespace IntegrationTests.Shared
             // Assert
             Assert.That(p.Birthday.Ticks, Is.EqualTo(ticks));
         }
+
+
+        public class TimeStore : RealmObject
+        {
+            public DateTimeOffset ts { get; set; }
+        }
+
+
+        [Test]
+        public void DateTimeOffsetLosesTimezoneWhenStored()
+        {
+            var nowInLocalZone = DateTimeOffset.Now;
+            TimeStore myObj = null;
+            _realm.Write(() => {
+                myObj = _realm.CreateObject<TimeStore>();
+                myObj.ts = nowInLocalZone;
+            });
+            Assert.That(nowInLocalZone.UtcTicks == myObj.ts.UtcTicks);
+            Assert.That(nowInLocalZone.Ticks != myObj.ts.Ticks);
+        }
     }
 }
