@@ -15,29 +15,74 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////
- 
+
+using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
+using System.Runtime.InteropServices;
 
 namespace Realms
 {
     internal class SchemaHandle : RealmHandle
     {
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-        public SchemaHandle(SchemaInitializerHandle schemaInitializerHandle)
+        private static class NativeMethods
         {
+            [DllImport(InteropConfig.DLL_NAME, EntryPoint = "schema_create", CallingConvention = CallingConvention.Cdecl)]
+            public static extern unsafe IntPtr create([MarshalAs(UnmanagedType.LPArray), In] SchemaObject[] objects, int objects_length,
+                                                              [MarshalAs(UnmanagedType.LPArray), In] SchemaProperty[] properties,
+                                                              [MarshalAs(UnmanagedType.LPArray), Out]IntPtr[] object_schema_handles, out NativeException ex);
+
+            [DllImport(InteropConfig.DLL_NAME, EntryPoint = "schema_clone", CallingConvention = CallingConvention.Cdecl)]
+            public static extern  IntPtr clone(SchemaHandle schema, [MarshalAs(UnmanagedType.LPArray), In, Out]IntPtr[] object_schema_handles, out NativeException ex);
+
+            [DllImport(InteropConfig.DLL_NAME, EntryPoint = "schema_destroy", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void destroy(IntPtr schema);
+        }
+
+        [Preserve]
+        public SchemaHandle()
+        {
+        }
+
+        public SchemaHandle(SharedRealmHandle parent) : base(parent)
+        {
+        }
+
+        public  void Initialize(SchemaObject[] objects, int count, SchemaProperty[] properties, IntPtr[] objectSchemaHandles)
+        {
+            NativeException nativeException;
+            var ptr = NativeMethods.create(objects, count, properties, objectSchemaHandles, out nativeException);
+            nativeException.ThrowIfNecessary();
+
             RuntimeHelpers.PrepareConstrainedRegions();
-            try { /* Retain handle in a constrained execution region */ }
+            try { }
             finally
             {
-                SetHandle(NativeSchema.create(schemaInitializerHandle));
+                SetHandle(ptr);
+            }
+        }
+
+        public  void InitializeCloneFrom(SchemaHandle schemaHandle, IntPtr[] objectSchemaHandles)
+        {
+            NativeException nativeException;
+            var ptr = NativeMethods.clone(schemaHandle, objectSchemaHandles, out nativeException);
+            nativeException.ThrowIfNecessary();
+
+            RuntimeHelpers.PrepareConstrainedRegions();
+            try { }
+            finally
+            {
+                SetHandle(ptr);
             }
         }
 
         protected override void Unbind()
         {
-            // Intentionally left blank -- the config object inside c++ has taken ownership and will 
-            // delete this when necessary.
+            // only destroy this instance if it isn't owned by a Realm
+            // Object Store's Realm class owns the Schema object
+            if (Root == null)
+            {
+                NativeMethods.destroy(handle);
+            }
         }
     }
 }

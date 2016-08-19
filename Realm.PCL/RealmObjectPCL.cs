@@ -40,6 +40,7 @@ namespace Realms
         /// </summary>
         public bool IsManaged => _realm != null;
 
+        public bool IsValid => false;
 
 
         #region Getters
@@ -158,7 +159,7 @@ namespace Realms
             return null;
         }
 
-        protected RealmList<T> GetListValue<T>(string propertyName) where T : RealmObject
+        protected IList<T> GetListValue<T>(string propertyName) where T : RealmObject
         {
             RealmPCLHelpers.ThrowProxyShouldNeverBeUsed();
             return null;

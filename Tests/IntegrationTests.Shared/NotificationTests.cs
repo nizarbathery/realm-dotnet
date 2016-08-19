@@ -31,7 +31,10 @@ using System.Runtime.InteropServices;
 
 namespace IntegrationTests.Shared
 {
-    [TestFixture]
+    [TestFixture, Preserve(AllMembers = true)]
+#if WINDOWS
+    [Ignore("Notifications are not implemented on Windows yet")]
+#endif
     public class NotificationTests
     {
         private string _databasePath;
@@ -109,7 +112,7 @@ namespace IntegrationTests.Shared
             });
 
             Exception error = null;
-            var query = _realm.All<OrderedObject>().Where(o => o.IsPartOfResults).OrderBy(o => o.Order) as RealmResults<OrderedObject>;
+            var query = _realm.All<OrderedObject>().Where(o => o.IsPartOfResults).OrderBy(o => o.Order);
             var observable = query.ToNotifyCollectionChanged(e => error = e, coalesceMultipleChangesIntoReset: coalesce);
             var handle = GCHandle.Alloc(observable); // prevent this from being collected across event loops
 

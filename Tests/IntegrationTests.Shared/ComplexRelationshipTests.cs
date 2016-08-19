@@ -24,17 +24,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
 
-// NOTE some of the following data comes from Tim's data used in the Browser screenshot in the Mac app store
-// unlike the Cocoa definitions, we use Pascal casing for properties
 namespace IntegrationTests.Shared
 {
-    [TestFixture]
+    [TestFixture, Preserve(AllMembers = true)]
     public class ComplexRelationshipTests
     {
         // based on user report, needs threee classes
         // will be searching on values coming from another table
 
-        // Also show how a privae int can be mapped to a different public struct property 
+        // Also show how a private int can be mapped to a different public struct property 
         public struct ServicedBy
         {
             private int _theInt;
@@ -62,7 +60,7 @@ namespace IntegrationTests.Shared
             public DateTimeOffset DateOfService { get; set; }
             public int HoursAtService { get; set; }
             public string Notes { get; set; }
-            public RealmList<ItemLogEntry> LoggedItems { get; }
+            public IList<ItemLogEntry> LoggedItems { get; }
             public string EngineSerial { get; set; }
             private int _servicedBy { get; set; }
             public ServicedBy ServicedBy {
@@ -160,8 +158,7 @@ namespace IntegrationTests.Shared
         // matches user sample
         public void GetAllMaintenanceIntervals(int engineHours, string engineSerial)
         {
-            var serial = engineSerial; //TODO Realm workaround
-            var logsForThisEngine = _realm.All<MaintenanceLogEntry>().Where(log => log.EngineSerial == serial);
+            var logsForThisEngine = _realm.All<MaintenanceLogEntry>().Where(log => log.EngineSerial == engineSerial);
             var llogs = logsForThisEngine.ToList();
             int foundInspected = 0;
             int foundReplaced = 0;
@@ -223,8 +220,7 @@ namespace IntegrationTests.Shared
 
         public void GetAllMaintenanceIntervalsRewritten(int engineHours, string engineSerial)
         {
-            var serial = engineSerial; //TODO Realm workaround
-            var logsForThisEngine = _realm.All<MaintenanceLogEntry>().Where(log => log.EngineSerial == serial);
+            var logsForThisEngine = _realm.All<MaintenanceLogEntry>().Where(log => log.EngineSerial == engineSerial);
             int foundInspected = 0;
             int foundReplaced = 0;
             foreach (var mle in logsForThisEngine) {

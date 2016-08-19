@@ -15,16 +15,33 @@
 // limitations under the License.
 //
 ////////////////////////////////////////////////////////////////////////////
- 
+
+using System;
+
 namespace Realms
 {
     // Tell the linker to preserve a class or method even if it looks like it's not invoked.
     // Since it matches by name, it works to just declare it here.
-    [System.AttributeUsage(System.AttributeTargets.All)]
-    public class PreserveAttribute : System.Attribute
+    [AttributeUsage(AttributeTargets.All)]
+    public class PreserveAttribute : Attribute
     {
-        public PreserveAttribute (string reason = null) {}
+#if WINDOWS
+        public bool AllMembers { get; set; }
         public bool Conditional { get; set; }
+#else
+        public bool AllMembers;
+        public bool Conditional;
+#endif
+
+        public PreserveAttribute(bool allMembers, bool conditional)
+        {
+            AllMembers = allMembers;
+            Conditional = conditional;
+        }
+
+        public PreserveAttribute()
+        {
+        }
     }
 }
 

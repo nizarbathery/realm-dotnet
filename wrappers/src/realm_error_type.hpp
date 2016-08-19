@@ -21,8 +21,12 @@
 
 namespace realm {
 
-    enum class RealmErrorType : size_t
+    // Keep this in sync with RealmExceptionCodes.cs
+    enum class RealmErrorType : signed char
     {
+        /** When no exception was thrown, we will use this code in the NativeException class. */
+        NoError = -1,
+
         RealmError = 0,
 
         /** Thrown for any I/O related exception scenarios when a realm is opened. */
@@ -58,6 +62,10 @@ namespace realm {
         RealmUnitializedRealm = 12,
 
         RealmFormatUpgradeRequired = 13,
+
+        RealmSchemaMismatch = 14,
+
+        RealmRowDetached = 21,
 
         StdArgumentOutOfRange = 100,
 

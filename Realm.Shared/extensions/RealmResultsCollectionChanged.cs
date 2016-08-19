@@ -20,6 +20,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Realms
@@ -33,7 +34,7 @@ namespace Realms
         /// <param name="errorCallback">An error callback that will be invoked if the observing thread raises an error.</param>
         /// <returns>An <see cref="ObservableCollection{T}" />-like object useful for MVVM databinding.</returns>
         /// <seealso cref="RealmResults{T}.SubscribeForNotifications(RealmResults{T}.NotificationCallback)"/>
-        public static INotifyCollectionChanged ToNotifyCollectionChanged<T>(this RealmResults<T> results, Action<Exception> errorCallback) where T : RealmObject
+        public static INotifyCollectionChanged ToNotifyCollectionChanged<T>(this IOrderedQueryable<T> results, Action<Exception> errorCallback) where T : RealmObject
         {
             return ToNotifyCollectionChanged(results, errorCallback, coalesceMultipleChangesIntoReset: false);
         }
@@ -49,11 +50,15 @@ namespace Realms
         /// </param>
         /// <returns>An <see cref="ObservableCollection{T}" />-like object useful for MVVM databinding.</returns>
         /// <seealso cref="RealmResults{T}.SubscribeForNotifications(RealmResults{T}.NotificationCallback)"/>
-        public static INotifyCollectionChanged ToNotifyCollectionChanged<T>(this RealmResults<T> results, Action<Exception> errorCallback, bool coalesceMultipleChangesIntoReset) where T : RealmObject
+        public static INotifyCollectionChanged ToNotifyCollectionChanged<T>(this IOrderedQueryable<T> results, Action<Exception> errorCallback, bool coalesceMultipleChangesIntoReset) where T : RealmObject
         {
             if (results == null)
             {
                 throw new ArgumentNullException(nameof(results));
+            }
+            if (!(results is RealmResults<T>))
+            {
+                throw new ArgumentException($"{nameof(results)} must be an instance of RealmResults<{typeof(T).Name}>", nameof(results));
             }
 
             if (errorCallback == null)
@@ -61,7 +66,7 @@ namespace Realms
                 throw new ArgumentNullException(nameof(errorCallback));
             }
 
-            return new ReadOnlyObservableCollection<T>(new Adapter<T>(results, errorCallback, coalesceMultipleChangesIntoReset));
+            return new ReadOnlyObservableCollection<T>(new Adapter<T>((RealmResults<T>)results, errorCallback, coalesceMultipleChangesIntoReset));
         }
 
         sealed class Adapter<T> : ObservableCollection<T> where T : RealmObject
@@ -80,6 +85,7 @@ namespace Realms
                 _coalesceMultipleChangesIntoReset = coalesceMultipleChangesIntoReset;
 
                 _token = results.SubscribeForNotifications(OnChange);
+                Debug.Assert(_token != null);
             }
 
             ~Adapter()

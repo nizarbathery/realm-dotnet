@@ -25,6 +25,7 @@
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <CodesignKey>iPhone Developer</CodesignKey>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <MtouchLink>Full</MtouchLink>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>full</DebugType>
@@ -73,6 +74,10 @@
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
     <Reference Include="MonoTouch.NUnitLite" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Remotion.Linq">
+      <HintPath>..\..\packages\Remotion.Linq.2.1.1\lib\portable-net45+win+wpa81+wp80\Remotion.Linq.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
@@ -95,6 +100,10 @@
     <ProjectReference Include="..\..\Realm.XamarinIOS\Realm.XamarinIOS.csproj">
       <Project>{A55BD773-5A29-4B2A-9DB7-1AB1DD38B537}</Project>
       <Name>Realm.XamarinIOS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PurePCLBuildableTest\PurePCLBuildableTest.csproj">
+      <Project>{C33439AD-387D-4F86-9DB8-9D4B48EC6750}</Project>
+      <Name>PurePCLBuildableTest</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

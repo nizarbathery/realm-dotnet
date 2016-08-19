@@ -1,4 +1,4 @@
-﻿////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
 //
@@ -41,8 +41,14 @@ namespace Realms
         private readonly RealmResultsProvider _provider = null;  // null if _allRecords
         private readonly bool _allRecords = false;
         private readonly Realm _realm;
+        private readonly RealmObject.Metadata _targetMetadata;
         private readonly List<NotificationCallback> _callbacks = new List<NotificationCallback>();
         private NotificationTokenHandle _notificationToken;
+
+        /// <summary>
+        /// The <see cref="Schema.ObjectSchema"/> that describes the type of item this collection can contain.
+        /// </summary>
+        public Schema.ObjectSchema ObjectSchema => _targetMetadata.Schema;
 
         internal ResultsHandle ResultsHandle => _resultsHandle ?? (_resultsHandle = CreateResultsHandle()); 
         private ResultsHandle _resultsHandle = null;
@@ -53,9 +59,10 @@ namespace Realms
         {
             get
             {
-                var row = NativeResults.get_row(ResultsHandle, (IntPtr)index);
-                var rowHandle = Realm.CreateRowHandle(row, _realm.SharedRealmHandle);
-                return (T)(object)_realm.MakeObjectForRow(typeof(T), rowHandle);
+                if (index < 0)
+                    throw new IndexOutOfRangeException ();
+                var rowPtr = ResultsHandle.GetRow(index);
+                return (T)(object)_realm.MakeObjectForRow(_targetMetadata, rowPtr);
             }
         }
 
@@ -96,37 +103,33 @@ namespace Realms
         /// <param name="error">An exception that might have occured while asynchronously monitoring a <see cref="RealmResults{T}"/> for changes, or <c>null</c> if no errors occured.</param>
         public delegate void NotificationCallback(RealmResults<T> sender, ChangeSet changes, Exception error);
 
-        internal RealmResults(Realm realm, RealmResultsProvider realmResultsProvider, Expression expression,
-            bool createdByAll)
+        internal RealmResults(Realm realm, RealmResultsProvider realmResultsProvider, Expression expression, RealmObject.Metadata metadata, bool createdByAll)
         {
             _realm = realm;
             _provider = realmResultsProvider;
             Expression = expression ?? Expression.Constant(this);
+            _targetMetadata = metadata;
             _allRecords = createdByAll;
 
         }
 
-        internal RealmResults(Realm realm, bool createdByAll)
-            : this(realm, new RealmResultsProvider(realm), null, createdByAll)
+        internal RealmResults(Realm realm, RealmObject.Metadata metadata, bool createdByAll)
+            : this(realm, new RealmResultsProvider(realm, metadata), null, metadata, createdByAll)
         {
         }
 
         private ResultsHandle CreateResultsHandle()
         {
-            var retType = typeof (T);
             if (_allRecords)
             {
-                return _realm.MakeResultsForTable(retType);
+                return _realm.MakeResultsForTable(_targetMetadata);
             }
-            else
-            {
-                // do all the LINQ expression evaluation to build a query
-                var qv = _provider.MakeVisitor(retType);
-                qv.Visit(Expression);
-                var queryHandle = qv._coreQueryHandle; // grab out the built query definition
-                var sortHandle = qv._optionalSortOrderHandle;
-                return _realm.MakeResultsForQuery(retType, queryHandle, sortHandle);
-            }
+            // do all the LINQ expression evaluation to build a query
+            var qv = _provider.MakeVisitor();
+            qv.Visit(Expression);
+            var queryHandle = qv._coreQueryHandle; // grab out the built query definition
+            var sortHandle = qv._optionalSortOrderHandle;
+            return _realm.MakeResultsForQuery(ObjectSchema, queryHandle, sortHandle);
         }
 
         /// <summary>
@@ -135,7 +138,7 @@ namespace Realms
         /// <returns>An IEnumerator which will iterate through found Realm persistent objects.</returns>
         public IEnumerator<T> GetEnumerator()
         {
-            return new RealmResultsEnumerator<T>(_realm, ResultsHandle);
+            return new RealmResultsEnumerator<T>(_realm, ResultsHandle, ObjectSchema);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -155,8 +158,8 @@ namespace Realms
             if (_allRecords)
             {
                 // use the type captured at build based on generic T
-                var tableHandle = _realm.Metadata[ElementType].Table;
-                return (int)NativeTable.count_all(tableHandle);
+                var tableHandle = _realm.Metadata[ObjectSchema.Name].Table;
+                return (int)NativeTable.CountAll(tableHandle);
             }
 
             // normally we would  be in RealmQRealmResultsr.VisitMethodCall, not here
@@ -164,7 +167,8 @@ namespace Realms
             // a RealmResults<blah> they change its compile-time type from IQueryable<blah> (which invokes LINQ)
             // to RealmResults<blah> and thus ends up here.
             // as in the unit test CountFoundWithCasting
-            return (int)NativeResults.count(ResultsHandle);
+            //return (int)NativeResults.count(ResultsHandle);
+            return (int) ResultsHandle.Count();
         }
 
         class NotificationToken : IDisposable
@@ -244,7 +248,7 @@ namespace Realms
 
             var managedResultsHandle = GCHandle.Alloc(this);
             var token = new NotificationTokenHandle(ResultsHandle);
-            var tokenHandle = NativeResults.add_notification_callback(ResultsHandle, GCHandle.ToIntPtr(managedResultsHandle), RealmResultsNativeHelper.NotificationCallback);;
+            var tokenHandle = ResultsHandle.AddNotificationCallback(GCHandle.ToIntPtr(managedResultsHandle), RealmResultsNativeHelper.NotificationCallback);
 
             RuntimeHelpers.PrepareConstrainedRegions();
             try
@@ -265,13 +269,13 @@ namespace Realms
             _notificationToken = null;
         }
                     
-        void RealmResultsNativeHelper.Interface.NotifyCallbacks(NativeResults.CollectionChangeSet? changes, NativeException? exception)
+        void RealmResultsNativeHelper.Interface.NotifyCallbacks(ResultsHandle.CollectionChangeSet? changes, NativeException? exception)
         {
             var managedException = exception?.Convert();
             ChangeSet changeset = null;
             if (changes != null)
             {
-                NativeResults.CollectionChangeSet actualChanges = changes.Value;
+                var actualChanges = changes.Value;
                 changeset = new ChangeSet(
                     insertedIndices: actualChanges.Insertions.AsEnumerable().Select(i => (int)i).ToArray(),
                     modifiedIndices: actualChanges.Modifications.AsEnumerable().Select(i => (int)i).ToArray(),
@@ -291,16 +295,16 @@ namespace Realms
     {
         internal interface Interface
         {
-            void NotifyCallbacks(NativeResults.CollectionChangeSet? changes, NativeException? exception);
+            void NotifyCallbacks(ResultsHandle.CollectionChangeSet? changes, NativeException? exception);
         }
 
         #if __IOS__
-        [ObjCRuntime.MonoPInvokeCallback(typeof(NativeResults.NotificationCallback))]
+        [ObjCRuntime.MonoPInvokeCallback(typeof(ResultsHandle.NotificationCallback))]
         #endif
-        internal static void NotificationCallback(IntPtr managedResultsHandle, PtrTo<NativeResults.CollectionChangeSet> changes, PtrTo<NativeException> exception)
+        internal static void NotificationCallback(IntPtr managedResultsHandle, IntPtr changes, IntPtr exception)
         {
             var results = (Interface)GCHandle.FromIntPtr(managedResultsHandle).Target;
-            results.NotifyCallbacks(changes.Value, exception.Value);
+            results.NotifyCallbacks(new PtrTo<ResultsHandle.CollectionChangeSet>(changes).Value, new PtrTo<NativeException>(exception).Value);
         }
     }
 }

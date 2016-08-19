@@ -31,7 +31,7 @@ namespace Realms
 
         protected override void Unbind()
         {
-            IntPtr managedResultsHandle = NativeResults.destroy_notificationtoken(handle);
+            IntPtr managedResultsHandle = ResultsHandle.DestroyNotificationtoken(handle);
             GCHandle.FromIntPtr(managedResultsHandle).Free();
         }
     }

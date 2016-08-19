@@ -20,6 +20,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <DocumentationFile>bin\Debug\Realm.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
@@ -27,6 +28,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <DocumentationFile>bin\Release\Realm.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\RealmAssemblyInfo.cs">
@@ -95,9 +97,24 @@
       <Link>PreserveAttribute.cs</Link>
     </Compile>
     <Compile Include="Extensions\RealmResultsCollectionChangedPCL.cs" />
+    <Compile Include="..\Realm.Shared\ICopyValuesFrom.cs">
+      <Link>ICopyValuesFrom.cs</Link>
+    </Compile>
+    <Compile Include="..\Realm.Shared\exceptions\RealmInvalidObjectException.cs">
+      <Link>Exceptions\RealmInvalidObjectException.cs</Link>
+    </Compile>
+    <Compile Include="..\Realm.Shared\Schema\Property.cs">
+      <Link>Schema\Property.cs</Link>
+    </Compile>
+    <Compile Include="..\Realm.Shared\Schema\PropertyType.cs">
+      <Link>Schema\PropertyType.cs</Link>
+    </Compile>
+    <Compile Include="Schema\ObjectSchemaPCL.cs" />
+    <Compile Include="Schema\RealmSchemaPCL.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Exceptions\" />
+    <Folder Include="Schema\" />
   </ItemGroup>
 </Project>

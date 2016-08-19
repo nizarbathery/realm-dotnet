@@ -29,7 +29,7 @@ namespace Realms {
         {
         }
 
-        public static Exception Create(RealmExceptionCodes exceptionCode, string message)
+        internal static Exception Create(RealmExceptionCodes exceptionCode, string message)
         {
             // these are increasing enum value order
             switch (exceptionCode) {
@@ -64,7 +64,13 @@ namespace Realms {
                     return new RealmInvalidTransactionException(message);
 
                 case RealmExceptionCodes.RealmFormatUpgradeRequired :
+                    return new RealmException(message);  // rare unrecoverable case for now
+
+                case RealmExceptionCodes.RealmSchemaMismatch :
                     return new RealmMigrationNeededException(message);
+
+                case RealmExceptionCodes.RealmRowDetached:
+                    return new RealmInvalidObjectException(message);
 
                 case RealmExceptionCodes.StdArgumentOutOfRange :
                     return new ArgumentOutOfRangeException(message);

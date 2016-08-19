@@ -20,26 +20,30 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Remotion.Linq.Parsing.ExpressionVisitors;
+using Remotion.Linq.Parsing.ExpressionVisitors.TreeEvaluation;
 
 namespace Realms
 {
     internal class RealmResultsProvider : IQueryProvider
     {
         private Realm _realm;
+        private readonly RealmObject.Metadata _metadata;
 
-        internal RealmResultsProvider(Realm realm)
+        internal RealmResultsProvider(Realm realm, RealmObject.Metadata metadata)
         {
             _realm = realm;
+            _metadata = metadata;
         }
 
-        internal RealmResultsVisitor MakeVisitor(Type retType)
+        internal RealmResultsVisitor MakeVisitor()
         {
-            return new RealmResultsVisitor(_realm, retType);
+            return new RealmResultsVisitor(_realm, _metadata);
         }
 
         public IQueryable<T> CreateQuery<T>(Expression expression)
         {
-            return new RealmResults<T>(_realm, this, expression, false);
+            return new RealmResults<T>(_realm, this, expression, _metadata, false);
         }
 
         public IQueryable CreateQuery(Expression expression)
@@ -57,8 +61,8 @@ namespace Realms
 
         public T Execute<T>(Expression expression)
         {
-            var retType = typeof(T);
-            var v = MakeVisitor(retType);
+            expression = PartialEvaluatingExpressionVisitor.EvaluateIndependentSubtrees(expression, new EvaluatableExpressionFilter());
+            var v = MakeVisitor();
             Expression visitResult = v.Visit(expression);
             var constExp = visitResult as ConstantExpression;
             T ret = (T)constExp?.Value;
@@ -68,6 +72,10 @@ namespace Realms
         public object Execute(Expression expression)
         {
             throw new Exception("Non-generic Execute() called...");
+        }
+
+        private class EvaluatableExpressionFilter : EvaluatableExpressionFilterBase
+        {
         }
 
     }

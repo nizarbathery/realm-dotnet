@@ -10,6 +10,7 @@
 *.userosscache
 *.sln.docstates
 *.opendb
+*.VC.db
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -142,6 +143,9 @@ Backup*/
 UpgradeLog*.XML
 UpgradeLog*.htm
 
+# JetBrains Rider files
+
+.idea.*
 
 
 ### Xcode ###
@@ -239,3 +243,5 @@ RealmWeaver.Fody.dll
 wrappers/libs-dbg
 
 *.xam
+
+Resource.designer.cs

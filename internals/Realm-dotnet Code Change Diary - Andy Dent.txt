@@ -2252,6 +2252,338 @@ SortingTests.cs
 RelationshipTests.cs
 - TestDeleteChildren added with Product and Report class definitions
 
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#287 IList Declarations
+
+RealmObjectPCL.cs
+- GetListValue return IList
+- _CopyDataFromBackingFieldsToRow - also skip over IList<>
+
+RealmList.cs
+- RealmListEnumerator 
+  - enumerating changed from RealmList to IList
+  - ctor param changed to IList
+
+Realm.cs
+- GenerateObjectSchema
+  - allow IList types in nullability checks
+  
+RealmObject.cs
+- GetListValue return type IList but still create RealmList
+- SetListValue added
+
+Use IList instead of RealmList in tests:
+- IntegrationTests.Shared
+  - Person.cs
+  - RelationshipTests.cs
+
+- WeaverTests
+  - AssemblyToProcess
+    - Person.cs
+    - FaultyClasses.cs
+  - Realm.FakeForWeaverTests/RealmObject.cs
+    - GetListValue return IList
+    - SetListValue take IList
+        
+ModuleWeaver.cs
+- _genericSetListValueReference added
+- Execute  - init _genericSetListValueReference to ref RealmObject.SetListValue
+- WeaveProperty
+  - allow Ilist<RealmObject subclass> as well as RealmList
+  - remove test banning setters on lists and RealmList
+  - generate setter for lists
+  
+NativeTable.cs
+- linklist_is_empty added
+
+wrappers/table_cs.cpp  
+- table_linklist_is_empty added
+
+
+RelationshipTests.cs
+- class Owner added set to Dogs property
+- TimLosesHisDogsByAssigningNull added
+- TestManagingStandaloneTwoLevelRelationship enabled & added check for full list added
+- TestManagingStandaloneThreeLevelRelationship enabled & added check for full list added
+- TestCircularRelationshipsFromStandaloneTwoStage enabled & added check for full list added
+- TestAddingRelationshipsToExistingViaAssignment added
+
+
+IntegrationTests.Shared/Person.cs
+- Friends added automatic set to property
+
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#287 IList Declarations - cope with adding hierarchies
+
+RealmObject.cs
+- _CopyDataFromBackingFieldsToRow remove continue for lists - they just work
+
+RelationshipTests.cs
+- TestManagingStandaloneTwoLevelRelationship - fix bad test values now it is being run
+
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#287 IList Declarations - remove setter and combine with Yavor's ICopyValuesFrom
+
+ModuleWeaver.cs
+- WeaveProperty
+  - put back test banning setters on lists and RealmList
+
+RelationshipTests.cs
+- class Owner removed set to Dogs property
+- TimLosesHisDogsByAssigningNull removed
+
+- TestAddingRelationshipsToExistingViaAssignment removd
+
+IntegrationTests.Shared/Person.cs
+- Friends removed automatic set to property
+
+RealmObject.cs
+- SetListValue removed
+- _CopyDataFromBackingFieldsToRow use ICopyValuesFrom to get method to invoke to copy into RealmList generic instance.
+
+
+RealmList
+- added internal interace ICopyValuesFrom (thanks Yavor)
+
+ICopyValuesFrom.cs
+- factored out internal interface so can reuse in PCL copy of RealmList
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#287 IList Declarations - weaving in default declarations for standalones
+
+Person.cs
+- remove init clause on Friends
+
+ModuleWeaver.cs
+- add System_IList field
+- Execute - init System_IList
+- WeaveProperty
+  - error if no backingField (temp double-check)
+  - IList set backing field to cope with new getter
+  - restore warning on IList disallowing setter
+- PrependListFieldInitializerToConstructor removed unused method
+- ReplaceListGetter added
+ 
+ #287 IList integration - add tests to help debug
+WeaverTests.cs - added SetManyRelationship to trigger 
+
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#694 Use Core 1.4.0
+
+Makefile 
+- bump versions
+
+linklist_cs.cpp
+- had to add #include <sstream> for ostringstream
+
+marshalling.cpp
+- had to add #include <iostream> for cerr
+
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#719 - Improve error messages for LINQ Member Expressions
+
+SimpleLINQTests.cs
+- IntegerConversionTriggersError added to see the message
+
+
+RealmResultsVisitor.cs
+- VisitBinary added Left and Right expression dumps into exception message.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#715 Fix Weaving error
+
+PurePCLBuildableTest.csproj
+- added to Realm.sln to make it easier to build and tests PCL errors
+
+ModuleWeaver.csproj
+- Execute - import System_IList directly from _realmAssembly.MainModule if fails to get type from _corLib
+
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+Fix signature mismatch in PCL ToNotifyCollectionChanged
+
+RealmResultsPCL.cs
+- changed RealmResults to implement IOrderedQueryable<T> instead of IQueryable<T>
+
+RealmResultsCollectionChanged.cs
+- replace RealmResults with IOrderedQueryable in ToNotifyCollectionChanged signatures
+
+QuickJournalLocal.sln
+- cloned entire QuickJournal example and built local copy using relative links to it and 
+  main Realm projects so can build and diagnose PCL errors without building nuget
+  
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+Add PCL built schemas into unit tests
+
+ObjectIntegrationTests.cs
+- CreateObjectFromPCLTest added
+
+InstanceTests.cs
+- GetInstanceFromPCLTest added
+
+IntegrationTests.XamarinAndroid
+IntegrationTests.XamarinIOS  
+- added reference to PurePCLBuildableTest
+
+PurePCLBuildableTest/Class1.cs
+- renamed to ObjectInPCL
+- added properties of each type
+
+PurePCLBuildableTest
+- TestBuildingRealmFromPCL.MakeARealmWithPCL added
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#739 Better empty schema exception messages
+
+ObjectSchema.cs
+- Builder.Build - throw message identifying bad schema name with URL for docs
+
+RealmSchema.cs
+- Builder.Build - throw message saying no RealmObjects, with URL for docs
+
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#518 Start Schema Version at zero
+
+RealmConfiguration.cs
+- NotVersioned removed
+- SchemaVersion now initialised to zero
+
+RealmConfigurationPCL.cs
+- NotVersioned removed
+
+ObjectIntegrationTests.cs
+- TriggerMigrationBySchemaVersion expect zero initial version
+
+ForMigrationsToCopyAndMigrate.realm
+- updated standard database with initial (zero) schema version
+
+RealmMigrationTests.cs
+- refactored out from ObjectIntegrationTests.cs
+- MigrationTriggersDelete - disabled as it is not triggered due issue 507
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#507 RealmMigrationSchemaNeededException not thrown
+
+wrappers/error_handling.hpp
+- RealmErrorType added RealmSchemaMismatch=14
+
+wrappers/error_handling.cpp
+- convert_exception - add case for SchemaMismatchException passed back as RealmSchemaMismatch
+
+RealmExceptionCodes.cs
+- RealmExceptionCodes  added RealmSchemaMismatch=14
+
+RealmException.cs
+- RealmException.Create  
+  - added case for RealmSchemaMismatch
+  - RealmFormatUpgradeRequired handled mapping to plain RealmException
+  
+RealmMigrationTests.cs
+- TriggerMigrationBySchemaEditing re-enabled
+
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+Refactoring MakeObject logic to assist ObjectID work and reduce lookups
+
+Realm.cs
+- MakeObjectForRow overload added to take a RealmObject.Metadata instead of doing lookup, and simple rowPtr
+- MakeObjectForRow original taking string, changed to take rowPtr for second arg and forward to new overload
+- MakeResultsForTable take metadata instead of class name
+
+RealmList.cs
+- added field _targetMetadata
+- this[int index]
+  - init _targetMetadata if null
+  - use new MakeObjectForRow
+
+RealmResults.cs
+- added field _targetMetadata
+- this[int index]
+  - init _targetMetadata if null
+  - use new MakeObjectForRow
+- CreateResultsHandle
+  - init _targetMetadata if null
+- MakeResultsForTable take metadata instead of name
+- RemoveAll - lookup metadata for MakeResultsForTable
+
+RealmObjectOps.cs
+-  GetObjectValue<T>(string propertyName) pass only rowPtr to MakeObjectForRow
+
+RealmObject.cs
+-  GetObjectValue<T>(string propertyName) pass only rowPtr to MakeObjectForRow
+
+RealmResultsEnumerator.cs
+- MoveNext
+  - quicker check for failure knowing a null rowPtr returned
+
+RealmResultsVisitor.cs
+- VisitMethodCall    
+  - quicker check for failure knowing a null rowPtr returned
+
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+Refactoring MakeObject logic to assist ObjectID work and reduce lookups
+
+Realm.cs
+- MakeObjectForRow overload added to take a RealmObject.Metadata instead of doing lookup, and simple rowPtr
+- MakeObjectForRow original taking string, changed to take rowPtr for second arg and forward to new overload
+- MakeResultsForTable take metadata instead of class name
+- MakeSortOrderForTable take metadata instead of class name
+- All(both overloads) - lookup metadata for RealmResults
+- RemoveAll optimise loop by foreach on Metadata instead of Schema
+
+RealmList.cs
+- RealmList
+  - added field _targetMetadata
+  - use new MakeObjectForRow
+  - IRealmList.SchemaClassName removed
+  - _schemaClassName removed
+  - ctor take a metadata param instead of className and set _targetMetadata
+- IRealmList - removed SchemaClassName
+
+RealmResults.cs
+- added field _targetMetadata
+- this[int index]
+  - init _targetMetadata if null
+  - use new MakeObjectForRow
+- CreateResultsHandle
+  - init _targetMetadata if null
+- MakeResultsForTable take metadata instead of name
+- RemoveAll - lookup metadata for MakeResultsForTable
+- ctor take Metadata instead of schema
+
+RealmResultsProvider.cs
+- _schema replaced by _metadata
+- ctor take Metadatata instead of schema
+
+
+RealmObjectOps.cs
+-  GetObjectValue<T>(string propertyName) pass only rowPtr to MakeObjectForRow
+- GetList lookup metadata for RealmList ctor
+
+RealmObject.cs
+-  GetObjectValue<T>(string propertyName) pass only rowPtr to MakeObjectForRow
+- GetListValue<T>(string propertyName) lookup metadata for RealmList ctor
+
+RealmResultsEnumerator.cs
+- MoveNext
+  - quicker check for failure knowing a null rowPtr returned
+
+RealmResultsVisitor.cs
+- _schema removed
+- _metadata added
+- VisitMethodCall    
+  - quicker check for failure knowing a null rowPtr returned
+
+
+RealmListPCL.cs
+- removed IRealmList.SchemaClassName
+
 
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 #644 Added Testing for nested Any

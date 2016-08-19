@@ -28,6 +28,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)LINQvariableTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NotificationTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AsyncTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DynamicAccessTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DynamicRelationshipTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LifetimeTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RealmMigrationTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ComplexRelationshipTests.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(ProjectName)' != 'IntegrationTests.Win32' ">

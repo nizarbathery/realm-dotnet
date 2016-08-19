@@ -1,4 +1,4 @@
-﻿////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
 //
@@ -32,13 +32,14 @@ namespace Realms
         private long _index = -1;  // must match Reset(), zero-based with no gaps indexing an ObjectStore Results
         private ResultsHandle _enumeratingResults = null;
         private Realm _realm;
-        private Type _retType = typeof(T);
+        private readonly Schema.ObjectSchema _schema;
 
 
-        internal RealmResultsEnumerator(Realm realm, ResultsHandle rh)
+        internal RealmResultsEnumerator(Realm realm, ResultsHandle rh, Schema.ObjectSchema schema)
         {
             _realm = realm;
             _enumeratingResults = rh;
+            _schema = schema;
         }
 
         /// <summary>
@@ -63,13 +64,14 @@ namespace Realms
                 return false;
             
             ++_index;
-            var rowPtr = NativeResults.get_row(_enumeratingResults, (IntPtr)_index);
-            var rowHandle = Realm.CreateRowHandle(rowPtr, _realm.SharedRealmHandle);
-            object nextObj = null;
-            if (!rowHandle.IsInvalid)                 
-                nextObj = _realm.MakeObjectForRow(_retType, rowHandle);
-            Current = (T)nextObj;
-            return nextObj != null;
+            var rowPtr = _enumeratingResults.GetRow(_index);
+            if (rowPtr == IntPtr.Zero) 
+            {
+                Current = (T)(object)null;
+                return false;
+            }
+            Current = (T)(object) _realm.MakeObjectForRow(_schema.Name, rowPtr);
+            return true;
         }
 
 
